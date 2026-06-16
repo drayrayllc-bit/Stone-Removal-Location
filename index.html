@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Stone Removal Locations</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <meta name="theme-color" content="#f5f5f7" />
+  <style>
+    :root{--bg:#f5f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#007aff;--red:#ff3b30;--green:#34c759;--gray:#8e8e93;--shadow:0 14px 35px rgba(0,0,0,.08);--radius:22px}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif} button,input,select{font:inherit} .wrap{max-width:920px;margin:0 auto;padding:18px 14px 50px}.top{position:sticky;top:0;z-index:5;margin:-18px -14px 18px;padding:18px 14px 12px;background:rgba(245,245,247,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(229,231,235,.8)}.toprow{max-width:920px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between}.title h1{margin:0;font-size:30px;letter-spacing:-.7px}.title p{margin:4px 0 0;color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center}.row input{flex:1}.stack{display:grid;gap:12px} label{font-weight:650;font-size:14px} input,select{width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px 14px;outline:none} input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14)}button{border:0;border-radius:16px;background:var(--blue);color:#fff;font-weight:700;padding:13px 16px;cursor:pointer}button.secondary{background:#eef2ff;color:#1f2937}button.ghost{background:#fff;color:var(--blue);border:1px solid var(--line)}button:active{transform:scale(.99)}.muted{color:var(--muted)}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none!important}.result{margin-top:14px}.stone-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.stone-head h2{margin:0;font-size:25px;letter-spacing:-.4px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800;white-space:nowrap}.status-to-be-removed{background:rgba(255,59,48,.12);color:#b42318}.status-removed{background:rgba(142,142,147,.16);color:#555}.status-in-bay{background:rgba(52,199,89,.14);color:#147a32}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.detail{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fafafa}.detail span{display:block;color:var(--muted);font-size:12px}.detail strong{display:block;margin-top:4px;font-size:18px}.facebox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.facebox label{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;font-size:17px}.facebox input{width:auto}.bay-card{border:1px solid var(--line);border-radius:18px;background:#fff;margin:12px 0;overflow:hidden}.bay-head{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;color:var(--text);text-align:left;border-radius:0;padding:14px 16px}.bay-head b{font-size:18px}.bay-body{padding:0 16px 12px}.stone-line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border-top:1px solid var(--line);padding:10px 0}.seq-list{display:grid;gap:10px}.seq-btn{background:#fff;color:var(--text);border:1px solid var(--line);display:flex;justify-content:space-between;text-align:left}.adminbar{display:flex;gap:10px;margin-top:14px}.adminbar select{flex:1}.notice{border-left:4px solid var(--blue)}.search-wrap{position:relative;flex:1}.suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);z-index:20;overflow:hidden;max-height:320px;overflow-y:auto}.suggestion{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left;background:#fff;color:var(--text);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:12px 14px}.suggestion:last-child{border-bottom:0}.suggestion b{font-size:16px}.suggestion small{color:var(--muted)}@media(max-width:620px){.row,.adminbar{flex-direction:column;align-items:stretch}.grid{grid-template-columns:1fr}.stone-line{grid-template-columns:1fr}.toprow{align-items:flex-start}.facebox{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="toprow">
+        <div class="title"><h1>Stone Removal Locations</h1><p id="syncStatus">Loading...</p></div>
+        <button id="adminBtn" class="secondary">Admin</button>
+      </div>
+    </header>
+
+    <section class="card stack">
+      <label for="stoneSearch">Search Stone Number</label>
+      <div class="row"><div class="search-wrap"><input id="stoneSearch" placeholder="C19-E01" autocomplete="off" autocapitalize="characters" /><div id="suggestions" class="suggestions hidden"></div></div><button id="searchBtn">Search</button></div>
+    </section>
+    <section id="searchResult" class="result"></section>
+
+    <section class="card stack">
+      <h2 style="margin:0">Deck QR / Deck View</h2>
+      <p class="muted" style="margin:0">Enter or scan a deck level, choose N/S/E/W, then display matching bays. Bay cards open expanded every time.</p>
+      <div class="row"><input id="deckInput" placeholder="Deck Level" /><button id="loadDeckBtn">Display</button></div>
+      <div class="facebox">
+        <label><input type="checkbox" value="N"> N</label>
+        <label><input type="checkbox" value="S"> S</label>
+        <label><input type="checkbox" value="E"> E</label>
+        <label><input type="checkbox" value="W"> W</label>
+      </div>
+      <section id="deckResult"></section>
+    </section>
+  </div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxsR6hsbijwrKSHhJdYZ22T5GeEBCw-5QBkXXxop9Bo2kD1EFFm9YuIPoADGIXMPV4x/exec';
+const ADMIN_PASSWORD = '091560';
+const CACHE_KEY = 'stone-location-cache-v2';
+const PENDING_KEY = 'stone-location-pending-status-v2';
+const ALLOWED_STATUSES = ['To Be Removed','Removed','In Bay'];
+let stones = [];
+let isAdmin = false;
+const $ = id => document.getElementById(id);
+
+function norm(v){return String(v ?? '').trim();}
+function normStone(v){return norm(v).toUpperCase().replace(/[–—]/g,'-').replace(/\s+/g,'-').replace(/[^A-Z0-9-]/g,'');}
+function searchKey(v){
+  let x = norm(v).toUpperCase().replace(/[–—]/g,'-').replace(/[^A-Z0-9]/g,'');
+  x = x.replace(/([NSEW])0+(\d+)/g, '$1$2');
+  return x;
+}
+function stoneValue(row){return field(row,'Stone Number','Stone','Stone #','Stone No','Stone No.');}
+function stoneMatches(row, query){
+  const q = searchKey(query);
+  if(!q) return false;
+  const full = searchKey(stoneValue(row));
+  const pretty = normStone(stoneValue(row));
+  return full.startsWith(q) || pretty.startsWith(normStone(query));
+}
+function normFace(v){return norm(v).toUpperCase().replace(/[^NSEW]/g,'').slice(0,1);}
+function normStatus(v){return ALLOWED_STATUSES.includes(norm(v)) ? norm(v) : 'To Be Removed';}
+function statusClass(s){return 'status-' + normStatus(s).toLowerCase().replaceAll(' ','-');}
+function canonicalKey(k){return String(k ?? '').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function field(row,...keys){
+  const wanted = keys.map(canonicalKey);
+  for(const [k,v] of Object.entries(row)){
+    if(wanted.includes(canonicalKey(k)) && v !== undefined && v !== null && String(v).trim() !== '') return v;
+  }
+  return '';
+}
+function rowId(row){return String(field(row,'ID','Id','id','Placement ID','Row ID') || '');}
+function displayWeight(row){const w = field(row,'Weight (lbs)','Weight','Weight lbs','Weight Pounds'); return w === '' ? '-' : `${w} lbs`;}
+function setSync(text){$('syncStatus').textContent = text;}
+function cleanRow(row){
+  const r = {...row};
+  r['Stone Number'] = normStone(field(r,'Stone Number','Stone Number ','Stone','Stone #','Stone No','Stone No.'));
+  r['Face/Elevation'] = normFace(field(r,'Face/Elevation','Face','Elevation','Face Elevation','NSEW'));
+  r['Status'] = normStatus(field(r,'Status'));
+  return r;
+}
+
+async function loadData(){
+  const cached = localStorage.getItem(CACHE_KEY);
+  if(cached){try{stones = JSON.parse(cached); setSync(`Cached data loaded: ${stones.length} stones`);}catch(e){}}
+  try{
+    const res = await fetch(API_URL + '?action=list&ts=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) throw new Error('Bad response');
+    const data = await res.json();
+    stones = (data.stones || []).map(cleanRow);
+    localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
+    setSync(`Live data loaded: ${stones.length} stones`);
+    syncPending();
+    applyUrlDeck();
+  }catch(err){
+    setSync(stones.length ? `Offline: using cached data (${stones.length} stones)` : 'Offline: no cached data yet');
+  }
+}
+
+function renderStone(row){
+  const id = rowId(row);
+  const status = normStatus(field(row,'Status'));
+  return `<article class="card">
+    <div class="stone-head"><h2>${field(row,'Stone Number')}</h2><span class="pill ${statusClass(status)}">${status}</span></div>
+    <div class="grid">
+      <div class="detail"><span>Sequence</span><strong>${field(row,'Sequence') || '-'}</strong></div>
+      <div class="detail"><span>Deck Level</span><strong>${field(row,'Deck Level','Deck','DeckLevel') || '-'}</strong></div>
+      <div class="detail"><span>Scaffold Bay</span><strong>${field(row,'Scaffold Bay','Bay','ScaffoldBay') || '-'}</strong></div>
+      <div class="detail"><span>Weight</span><strong>${displayWeight(row)}</strong></div>
+    </div>
+    ${isAdmin ? adminControls(id,status) : ''}
+  </article>`;
+}
+function adminControls(id,status){
+  if(!id) return `<p class="muted">Missing ID. Add an ID column to update this status.</p>`;
+  return `<div class="adminbar"><select data-status-for="${id}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><button onclick="updateStatus('${id}')">Save Status</button></div>`;
+}
+
+function getStoneMatches(query){
+  return stones.filter(s => stoneMatches(s, query));
+}
+function searchStone(){
+  hideSuggestions();
+  const qRaw = $('stoneSearch').value;
+  const q = searchKey(qRaw);
+  const out = $('searchResult');
+  if(!q){out.innerHTML = `<div class="card notice"><b>Enter a stone number.</b></div>`; return;}
+  const matches = getStoneMatches(qRaw);
+  if(!matches.length){out.innerHTML = `<div class="card"><h2>Stone Not Found</h2><p class="muted">No match for ${normStone(qRaw)}.</p></div>`; return;}
+  const exact = matches.filter(s => searchKey(stoneValue(s)) === q);
+  const finalMatches = exact.length ? exact : matches;
+  if(finalMatches.length === 1){out.innerHTML = renderStone(finalMatches[0]); return;}
+  out.innerHTML = `<div class="card"><h2>Multiple Matches Found</h2><p class="muted">Select the correct stone/sequence before viewing details.</p><div class="seq-list">${finalMatches.map((m,i)=>`<button class="seq-btn" onclick="showMatchByIndex(${stones.indexOf(m)})"><span><b>${stoneValue(m)}</b><br><span class="muted">Seq ${field(m,'Sequence') || '-'} • Deck ${field(m,'Deck Level','Deck','DeckLevel') || '-'} • ${field(m,'Scaffold Bay','Bay','ScaffoldBay') || '-'}</span></span><span>${displayWeight(m)}</span></button>`).join('')}</div></div>`;
+}
+window.showMatchByIndex = function(index){
+  const row = stones[index];
+  if(row){$('stoneSearch').value = stoneValue(row); $('searchResult').innerHTML = renderStone(row); hideSuggestions();}
+};
+function updateSuggestions(){
+  const q = $('stoneSearch').value;
+  const box = $('suggestions');
+  if(searchKey(q).length < 2){hideSuggestions(); return;}
+  const seen = new Set();
+  const items = [];
+  for(const s of getStoneMatches(q)){
+    const label = stoneValue(s);
+    const key = searchKey(label) + '|' + norm(field(s,'Sequence')) + '|' + norm(field(s,'Deck Level','Deck','DeckLevel')) + '|' + norm(field(s,'Scaffold Bay','Bay','ScaffoldBay'));
+    if(!seen.has(key)){seen.add(key); items.push(s);}
+    if(items.length >= 12) break;
+  }
+  if(!items.length){hideSuggestions(); return;}
+  box.innerHTML = items.map(s=>`<button type="button" class="suggestion" onclick="pickSuggestion(${stones.indexOf(s)})"><span><b>${stoneValue(s)}</b><br><small>Seq ${field(s,'Sequence') || '-'} • Deck ${field(s,'Deck Level','Deck','DeckLevel') || '-'} • ${field(s,'Scaffold Bay','Bay','ScaffoldBay') || '-'}</small></span><small>${displayWeight(s)}</small></button>`).join('');
+  box.classList.remove('hidden');
+}
+window.pickSuggestion = function(index){
+  const row = stones[index];
+  if(!row) return;
+  $('stoneSearch').value = stoneValue(row);
+  $('searchResult').innerHTML = renderStone(row);
+  hideSuggestions();
+};
+function hideSuggestions(){const box = $('suggestions'); if(box) box.classList.add('hidden');}
+
+function selectedFaces(){return [...document.querySelectorAll('.facebox input:checked')].map(i=>i.value);}
+function loadDeck(){
+  const deck = norm($('deckInput').value);
+  const faces = selectedFaces();
+  const out = $('deckResult');
+  if(!deck){out.innerHTML = `<div class="card notice"><b>Enter a deck level.</b></div>`; return;}
+  if(!faces.length){out.innerHTML = `<div class="card notice"><b>Choose at least one face: N, S, E, or W.</b></div>`; return;}
+  const rows = stones.filter(s => norm(field(s,'Deck Level','Deck','DeckLevel')) === deck && faces.includes(normFace(field(s,'Face/Elevation','Face','Elevation'))));
+  if(!rows.length){out.innerHTML = `<div class="card"><h2>No stones found</h2><p class="muted">Deck ${deck}, faces ${faces.join(', ')}.</p></div>`; return;}
+  const groups = new Map();
+  rows.forEach(r=>{const bay = norm(field(r,'Scaffold Bay','Bay','ScaffoldBay')) || 'No Bay Assigned'; if(!groups.has(bay)) groups.set(bay,[]); groups.get(bay).push(r);});
+  const sorted = [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));
+  const totalWeight = rows.reduce((sum,r)=>sum + (parseFloat(field(r,'Weight (lbs)','Weight')) || 0),0);
+  out.innerHTML = `<div class="card"><h2>Deck Level ${deck}</h2><p class="muted">Faces: ${faces.join(', ')} • ${rows.length} stones • ${totalWeight.toLocaleString()} lbs total</p></div>` + sorted.map(([bay,items])=>renderBay(bay,items)).join('');
+}
+function renderBay(bay,items){
+  const weight = items.reduce((sum,r)=>sum + (parseFloat(field(r,'Weight (lbs)','Weight')) || 0),0);
+  items.sort((a,b)=>field(a,'Stone Number','Stone','Stone #','Stone No','Stone No.').localeCompare(field(b,'Stone Number','Stone','Stone #','Stone No','Stone No.'),undefined,{numeric:true}) || norm(field(a,'Sequence')).localeCompare(norm(field(b,'Sequence')),undefined,{numeric:true}));
+  return `<div class="bay-card" data-expanded="true"><button class="bay-head" onclick="toggleBay(this)"><span><b>▼ ${bay}</b><br><span class="muted">${items.length} stones • ${weight.toLocaleString()} lbs</span></span></button><div class="bay-body">${items.map(r=>`<div class="stone-line"><b>${field(r,'Stone Number','Stone','Stone #','Stone No','Stone No.')}</b><span>Seq ${field(r,'Sequence') || '-'}</span><span class="pill ${statusClass(field(r,'Status'))}">${normStatus(field(r,'Status'))}</span></div>`).join('')}</div></div>`;
+}
+window.toggleBay = function(btn){const card = btn.closest('.bay-card'); const body = card.querySelector('.bay-body'); const b = btn.querySelector('b'); const expanded = card.dataset.expanded === 'true'; card.dataset.expanded = expanded ? 'false':'true'; body.style.display = expanded ? 'none':'block'; b.textContent = b.textContent.replace(expanded ? '▼':'▶', expanded ? '▶':'▼');};
+
+async function updateStatus(id){
+  const sel = document.querySelector(`[data-status-for="${CSS.escape(id)}"]`);
+  const status = sel ? sel.value : '';
+  if(!ALLOWED_STATUSES.includes(status)) return alert('Invalid status');
+  const row = stones.find(s => rowId(s) === String(id));
+  if(row) row.Status = status;
+  localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
+  try{
+    await fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action:'updateStatus', id, status})});
+    setSync('Status saved. Refreshing live data...');
+    setTimeout(loadData, 900);
+  }catch(err){
+    queuePending({id,status});
+    setSync('Offline: status queued and will sync later');
+  }
+  searchStone();
+}
+window.updateStatus = updateStatus;
+function queuePending(item){const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]'); q.push(item); localStorage.setItem(PENDING_KEY, JSON.stringify(q));}
+async function syncPending(){
+  const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+  if(!q.length) return;
+  const remaining = [];
+  for(const item of q){try{await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'updateStatus',...item})});}catch(e){remaining.push(item);}}
+  localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
+}
+function unlockAdmin(){
+  const pw = prompt('Enter admin password');
+  if(pw === null) return;
+  if(pw === ADMIN_PASSWORD){isAdmin = true; $('adminBtn').textContent = 'Admin On'; alert('Admin mode unlocked.'); searchStone(); loadDeck();}
+  else alert('Incorrect password.');
+}
+function applyUrlDeck(){const p = new URLSearchParams(location.search); const deck = p.get('deck') || p.get('Deck'); if(deck){$('deckInput').value = deck;}}
+$('searchBtn').addEventListener('click', searchStone);
+$('stoneSearch').addEventListener('keydown', e=>{if(e.key==='Enter') searchStone();});
+$('stoneSearch').addEventListener('input', updateSuggestions);
+$('stoneSearch').addEventListener('focus', updateSuggestions);
+document.addEventListener('click', e=>{if(!e.target.closest('.search-wrap')) hideSuggestions();});
+$('loadDeckBtn').addEventListener('click', loadDeck);
+$('adminBtn').addEventListener('click', unlockAdmin);
+window.addEventListener('online', loadData);
+applyUrlDeck();
+loadData();
+</script>
+</body>
+</html>
