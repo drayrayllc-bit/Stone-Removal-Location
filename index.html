@@ -24,7 +24,7 @@
 
     <section class="card stack">
       <label for="stoneSearch">Search Stone Number</label>
-      <div class="row"><div class="search-wrap"><input id="stoneSearch" placeholder="C19-E01" autocomplete="off" autocapitalize="characters" /><div id="suggestions" class="suggestions hidden"></div></div><button id="searchBtn">Search</button></div>
+      <div class="row"><div class="search-wrap"><input id="stoneSearch" value="C" placeholder="C48-W01" autocomplete="off" autocapitalize="characters" /><div id="suggestions" class="suggestions hidden"></div></div><button id="searchBtn">Search</button></div>
     </section>
     <section id="searchResult" class="result"></section>
 
@@ -58,11 +58,26 @@ let lastSyncAt = null;
 const $ = id => document.getElementById(id);
 
 function norm(v){return String(v ?? '').trim();}
+function normDeck(v){
+  const text = norm(v).toUpperCase();
+  const match = text.match(/(?:DECK\s*LEVEL|DECK|D)?\s*0*(\d{1,3})\b/);
+  return match ? String(Number(match[1])) : text;
+}
 function normStone(v){return norm(v).toUpperCase().replace(/[–—]/g,'-').replace(/\s+/g,'-').replace(/[^A-Z0-9-]/g,'');}
 function searchKey(v){
   let x = norm(v).toUpperCase().replace(/[–—]/g,'-').replace(/[^A-Z0-9]/g,'');
+  // Accept field typing mistakes like 48-W1, C48-W1, CC48-W01, or CCC48W001.
+  // If it looks like a normal stone number, force exactly one leading C.
+  if(/^C+\d/.test(x)){ x = x.replace(/^C+/, ''); }
+  if(/^\d/.test(x)){ x = 'C' + x; }
+  // Ignore leading zeros after the face/elevation letter so W1 matches W01.
   x = x.replace(/([NSEW])0+(\d+)/g, '$1$2');
   return x;
+}
+function effectiveStoneQuery(v){
+  const raw = norm(v).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!raw || /^C+$/.test(raw)) return '';
+  return searchKey(v);
 }
 function stoneValue(row){return field(row,'Stone Number','Stone','Stone #','Stone No','Stone No.');}
 function stoneMatches(row, query){
@@ -134,7 +149,7 @@ async function loadData(options = {}){
 
 function refreshCurrentViews(){
   if(searchKey($('stoneSearch').value)) searchStone();
-  const deck = norm($('deckInput').value);
+  const deck = normDeck($('deckInput').value);
   if(deck){
     if(selectedDeckSequence) displayDeckRows();
     else renderDeckControls();
@@ -171,7 +186,7 @@ function getStoneMatches(query){
 function searchStone(){
   hideSuggestions();
   const qRaw = $('stoneSearch').value;
-  const q = searchKey(qRaw);
+  const q = effectiveStoneQuery(qRaw);
   const out = $('searchResult');
   if(!q){out.innerHTML = `<div class="card notice"><b>Enter a stone number.</b></div>`; return;}
   const matches = getStoneMatches(qRaw);
@@ -188,7 +203,7 @@ window.showMatchByIndex = function(index){
 function updateSuggestions(){
   const q = $('stoneSearch').value;
   const box = $('suggestions');
-  if(searchKey(q).length < 2){hideSuggestions(); return;}
+  if(effectiveStoneQuery(q).length < 2){hideSuggestions(); return;}
   const seen = new Set();
   const items = [];
   for(const s of getStoneMatches(q)){
@@ -211,7 +226,7 @@ window.pickSuggestion = function(index){
 function hideSuggestions(){const box = $('suggestions'); if(box) box.classList.add('hidden');}
 
 function selectedFaces(){return [...document.querySelectorAll('#faceBox input:checked')].map(i=>i.value);}
-function deckRows(deck){return stones.filter(s => norm(field(s,'Deck Level','Deck','DeckLevel')) === deck);}
+function deckRows(deck){return stones.filter(s => normDeck(field(s,'Deck Level','Deck','DeckLevel')) === deck);}
 function sequenceSort(a,b){return String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'});}
 function faceSort(a,b){return ['N','S','E','W'].indexOf(a) - ['N','S','E','W'].indexOf(b);}
 function renderSequencePicker(deck, rows){
@@ -244,7 +259,7 @@ function renderFaceControls(deck, rows){
   faceBox.querySelectorAll('input').forEach(i=>i.addEventListener('change', displayDeckRows));
 }
 function renderDeckControls(){
-  const deck = norm($('deckInput').value);
+  const deck = normDeck($('deckInput').value);
   const out = $('deckResult');
   $('faceBox').classList.add('hidden');
   $('faceBox').innerHTML = '';
@@ -262,13 +277,13 @@ function loadDeck(){
   renderDeckControls();
 }
 function displayDeckRows(){
-  const deck = norm($('deckInput').value);
+  const deck = normDeck($('deckInput').value);
   const faces = selectedFaces();
   const out = $('deckResult');
   if(!deck){out.innerHTML = `<div class="card notice"><b>Enter a deck level.</b></div>`; return;}
   if(!selectedDeckSequence){out.innerHTML = `<div class="card notice"><b>Select a sequence first.</b></div>`; return;}
   if(!faces.length){out.innerHTML = `<div class="card notice"><b>Choose at least one available face/elevation.</b></div>`; return;}
-  const rows = stones.filter(s => norm(field(s,'Deck Level','Deck','DeckLevel')) === deck && sequenceValue(s) === selectedDeckSequence && faces.includes(normFace(field(s,'Face/Elevation','Face','Elevation'))));
+  const rows = stones.filter(s => normDeck(field(s,'Deck Level','Deck','DeckLevel')) === deck && sequenceValue(s) === selectedDeckSequence && faces.includes(normFace(field(s,'Face/Elevation','Face','Elevation'))));
   if(!rows.length){out.innerHTML = `<div class="card"><h2>No stones found</h2><p class="muted">Deck ${deck}, Sequence ${selectedDeckSequence}, faces ${faces.join(', ')}.</p></div>`; return;}
   const groups = new Map();
   rows.forEach(r=>{const bay = norm(field(r,'Scaffold Bay','Bay','ScaffoldBay')) || 'No Bay Assigned'; if(!groups.has(bay)) groups.set(bay,[]); groups.get(bay).push(r);});
@@ -293,7 +308,7 @@ function parseDeckFromQR(value){
   try{
     const url = new URL(text);
     const deckParam = url.searchParams.get('deck') || url.searchParams.get('Deck');
-    if(deckParam) return norm(deckParam);
+    if(deckParam) return normDeck(deckParam);
   }catch(e){}
   const m = text.match(/deck\s*(level)?\s*[:#-]?\s*(\d+)/i) || text.match(/[?&]deck=(\d+)/i) || text.match(/^(\d{1,3})$/);
   return m ? norm(m[m.length-1]) : '';
@@ -393,6 +408,7 @@ function unlockAdmin(){
 function applyUrlDeck(){const p = new URLSearchParams(location.search); const deck = p.get('deck') || p.get('Deck'); if(deck){$('deckInput').value = deck; if(stones.length) renderDeckControls();}}
 $('searchBtn').addEventListener('click', searchStone);
 $('stoneSearch').addEventListener('keydown', e=>{if(e.key==='Enter') searchStone();});
+$('stoneSearch').addEventListener('focus', e=>{try{e.target.setSelectionRange(e.target.value.length, e.target.value.length);}catch(err){}});
 $('stoneSearch').addEventListener('input', updateSuggestions);
 $('stoneSearch').addEventListener('focus', updateSuggestions);
 document.addEventListener('click', e=>{if(!e.target.closest('.search-wrap')) hideSuggestions();});
