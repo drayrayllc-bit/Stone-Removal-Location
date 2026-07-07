@@ -191,9 +191,11 @@ function renderStone(row){
     ${isAdmin ? adminControls(id,status,weighedWeightValue(row)) : ''}
   </article>`;
 }
+function escAttr(v){return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function adminControls(id,status,weighedWeight){
   if(!id) return `<p class="muted">Missing ID. Add an ID column to update this status and weighed weight.</p>`;
-  return `<div class="adminbar"><select data-status-for="${id}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><input data-weighed-for="${id}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${weighedWeight || ''}"><button onclick="updateStoneAdmin('${id}')">Save</button></div>`;
+  const safeId = escAttr(id);
+  return `<div class="adminbar" data-admin-row="${safeId}"><select data-status-for="${safeId}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><input data-weighed-for="${safeId}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}"><button type="button" onclick="updateStoneAdmin(this, '${safeId}')">Save</button></div>`;
 }
 
 function getStoneMatches(query){
@@ -392,20 +394,40 @@ function stopCameraScanner(){
   $('cameraBtn').classList.remove('hidden');
 }
 
-async function updateStoneAdmin(id){
+async function updateStoneAdmin(btnOrId, maybeId){
   if(!isAdmin) return alert('Admin mode is required.');
-  const sel = document.querySelector(`[data-status-for="${CSS.escape(id)}"]`);
-  const weightInput = document.querySelector(`[data-weighed-for="${CSS.escape(id)}"]`);
+
+  const btn = (btnOrId && typeof btnOrId === 'object') ? btnOrId : null;
+  const id = String(maybeId || btnOrId || '');
+  const bar = btn ? btn.closest('.adminbar') : document.querySelector(`[data-admin-row="${CSS.escape(id)}"]`);
+  const sel = bar ? bar.querySelector('select') : document.querySelector(`[data-status-for="${CSS.escape(id)}"]`);
+  const weightInput = bar ? bar.querySelector('input') : document.querySelector(`[data-weighed-for="${CSS.escape(id)}"]`);
+
   const status = sel ? sel.value : '';
   const weighedWeight = weightInput ? String(weightInput.value || '').trim() : '';
+
   if(!ALLOWED_STATUSES.includes(status)) return alert('Invalid status');
   if(weighedWeight !== '' && (Number.isNaN(Number(weighedWeight)) || Number(weighedWeight) < 0)) return alert('Enter a valid weighed weight.');
-  const row = stones.find(s => rowId(s) === String(id));
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving...'; }
+
+  const row = stones.find(s => rowId(s) === id);
   if(row){
     row.Status = status;
+    row['Status'] = status;
     row['Weighed Weight'] = weighedWeight;
+    row['Weighed Weight (lbs)'] = weighedWeight;
   }
   localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
+
+  // Update the visible card immediately so it does not snap back to the old cached status.
+  if(row){
+    $('searchResult').innerHTML = renderStone(row);
+  }else{
+    const pill = document.querySelector('.stone-head .pill');
+    if(pill){ pill.className = 'pill ' + statusClass(status); pill.textContent = status; }
+  }
+
   const payload = {action:'updateStoneAdmin', id, status, weighedWeight};
   try{
     const res = await fetch(API_URL, {
@@ -419,14 +441,15 @@ async function updateStoneAdmin(id){
     if(!res.ok || data.ok === false || data.error){
       throw new Error(data.error || text || 'Save failed');
     }
-    setSync('Stone admin fields saved.');
-    searchStone();
+    setSync('Saved to Google Sheets.');
     if(selectedDeckSequence) displayDeckRows();
   }catch(err){
     queuePending(payload);
     setSync('Save failed or offline: admin changes queued and will sync later');
-    alert('Save did not reach Google Sheets yet. Check that the Apps Script has the updateStoneAdmin action deployed/redeployed. The app will show the local change for now.');
-    searchStone();
+    alert('The screen was updated locally, but Google Sheets did not confirm the save. Make sure the newest Apps Script is deployed. Error: ' + err.message);
+  }finally{
+    const newBtn = document.querySelector(`[data-admin-row="${CSS.escape(id)}"] button`);
+    if(newBtn){ newBtn.disabled = false; newBtn.textContent = 'Save'; }
   }
 }
 window.updateStoneAdmin = updateStoneAdmin;
