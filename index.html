@@ -395,6 +395,29 @@ function stopCameraScanner(){
   $('cameraBtn').classList.remove('hidden');
 }
 
+
+function buildSaveUrl(payload){
+  const params = new URLSearchParams();
+  params.set('action', 'updateStoneAdmin');
+  params.set('ts', String(Date.now()));
+  params.set('rowNumber', payload.rowNumber || '');
+  params.set('stoneNumber', payload.stoneNumber || '');
+  params.set('sequence', payload.sequence || '');
+  params.set('deckLevel', payload.deckLevel || '');
+  params.set('scaffoldBay', payload.scaffoldBay || '');
+  params.set('faceElevation', payload.faceElevation || '');
+  params.set('status', payload.status || '');
+  params.set('weighedWeight', payload.weighedWeight || '');
+  return API_URL + '?' + params.toString();
+}
+
+async function sendAdminUpdate(payload){
+  const url = buildSaveUrl(payload);
+  // Google Apps Script web apps can be blocked by browser CORS on POST from GitHub Pages.
+  // This sends a simple GET update that Apps Script can process reliably from mobile Safari.
+  await fetch(url, {method:'GET', mode:'no-cors', cache:'no-store'});
+}
+
 async function updateStoneAdmin(btnOrId, maybeId){
   if(!isAdmin) return alert('Admin mode is required.');
 
@@ -442,18 +465,13 @@ async function updateStoneAdmin(btnOrId, maybeId){
     weighedWeight
   };
   try{
-    await fetch(API_URL, {
-      method:'POST',
-      mode:'no-cors',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(payload)
-    });
-    setSync('Save sent to Google Sheets. Refresh data in a few seconds to confirm.');
+    await sendAdminUpdate(payload);
+    setSync('Save sent to Google Sheets. Tap Refresh Data in a few seconds to confirm.');
     if(selectedDeckSequence) displayDeckRows();
   }catch(err){
     queuePending(payload);
     setSync('Save failed or offline: admin changes queued and will sync later');
-    alert('The screen was updated locally, but Google Sheets did not confirm the save. Make sure the newest Apps Script is deployed. Error: ' + err.message);
+    alert('Save failed. Error: ' + err.message);
   }finally{
     const newBtn = document.querySelector(`[data-admin-row="${CSS.escape(id)}"] button`);
     if(newBtn){ newBtn.disabled = false; newBtn.textContent = 'Save'; }
@@ -468,7 +486,7 @@ async function syncPending(){
   const remaining = [];
   for(const item of q){
     try{
-      await fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item.action ? item : {action:'updateStoneAdmin',...item})});
+      await sendAdminUpdate(item.action ? item : {action:'updateStoneAdmin',...item});
     }catch(e){remaining.push(item);}
   }
   localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
