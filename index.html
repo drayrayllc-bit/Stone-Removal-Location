@@ -100,6 +100,8 @@ function field(row,...keys){
   return '';
 }
 function rowId(row){return String(row.__clientKey || field(row,'__rowNumber','Sheet Row','Row Number') || field(row,'ID','Id','id','Placement ID','Row ID') || '');}
+function rowUniqueKey(row){return rowId(row);}
+function findStoneByKey(key){return stones.find(s => rowId(s) === String(key || ''));}
 function plannedWeightValue(row){return field(row,'Weight (lbs)','Weight','Weight lbs','Weight Pounds');}
 function displayWeight(row){const w = plannedWeightValue(row); return w === '' ? '-' : `${Number(w).toLocaleString()} lbs`;}
 function weighedWeightValue(row){return field(row,'Weighed Weight','Weighed Weight (lbs)','Weighed Weight lbs','Actual Weight','Actual Weight (lbs)');}
@@ -177,7 +179,7 @@ function manualRefresh(){
 
 
 function renderStone(row){
-  const id = rowId(row);
+  const key = rowUniqueKey(row);
   const status = normStatus(field(row,'Status'));
   return `<article class="card">
     <div class="stone-head"><h2>${field(row,'Stone Number')}</h2><span class="pill ${statusClass(status)}">${status}</span></div>
@@ -189,14 +191,14 @@ function renderStone(row){
       <div class="detail"><span>Weighed Weight</span><strong>${displayWeighedWeight(row)}</strong></div>
       <div class="detail"><span>Difference</span><strong>${weightDifference(row)}</strong></div>
     </div>
-    ${isAdmin ? adminControls(id,status,weighedWeightValue(row)) : ''}
+    ${isAdmin ? adminControls(key,status,weighedWeightValue(row)) : ''}
   </article>`;
 }
 function escAttr(v){return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function adminControls(id,status,weighedWeight){
-  if(!id) return `<p class="muted">Missing ID. Add an ID column to update this status and weighed weight.</p>`;
-  const safeId = escAttr(id);
-  return `<div class="adminbar" data-admin-row="${safeId}"><select data-status-for="${safeId}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><input data-weighed-for="${safeId}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}"><button type="button" onclick="updateStoneAdmin(this, '${safeId}')">Save</button></div>`;
+function adminControls(key,status,weighedWeight){
+  if(!key) return `<p class="muted">Missing row key. Refresh data and try again.</p>`;
+  const safeKey = escAttr(key);
+  return `<div class="adminbar" data-admin-row="${safeKey}"><select data-status-for="${safeKey}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><input data-weighed-for="${safeKey}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}"><button type="button" onclick="updateStoneAdmin(this, '${safeKey}')">Save</button></div>`;
 }
 
 function getStoneMatches(query){
@@ -422,10 +424,10 @@ async function updateStoneAdmin(btnOrId, maybeId){
   if(!isAdmin) return alert('Admin mode is required.');
 
   const btn = (btnOrId && typeof btnOrId === 'object') ? btnOrId : null;
-  const id = String(maybeId || btnOrId || '');
-  const bar = btn ? btn.closest('.adminbar') : document.querySelector(`[data-admin-row="${CSS.escape(id)}"]`);
-  const sel = bar ? bar.querySelector('select') : document.querySelector(`[data-status-for="${CSS.escape(id)}"]`);
-  const weightInput = bar ? bar.querySelector('input') : document.querySelector(`[data-weighed-for="${CSS.escape(id)}"]`);
+  const key = String(maybeId || btnOrId || '');
+  const bar = btn ? btn.closest('.adminbar') : document.querySelector(`[data-admin-row="${CSS.escape(key)}"]`);
+  const sel = bar ? bar.querySelector('select') : document.querySelector(`[data-status-for="${CSS.escape(key)}"]`);
+  const weightInput = bar ? bar.querySelector('input') : document.querySelector(`[data-weighed-for="${CSS.escape(key)}"]`);
 
   const status = sel ? sel.value : '';
   const weighedWeight = weightInput ? String(weightInput.value || '').trim() : '';
@@ -435,7 +437,7 @@ async function updateStoneAdmin(btnOrId, maybeId){
 
   if(btn){ btn.disabled = true; btn.textContent = 'Saving...'; }
 
-  const row = stones.find(s => rowId(s) === id);
+  const row = findStoneByKey(key);
   if(row){
     row.Status = status;
     row['Status'] = status;
@@ -454,7 +456,7 @@ async function updateStoneAdmin(btnOrId, maybeId){
 
   const payload = {
     action:'updateStoneAdmin',
-    id,
+    id: row ? rowId(row) : '',
     rowNumber: row ? (row.__rowNumber || field(row,'Sheet Row','Row Number')) : '',
     stoneNumber: row ? stoneValue(row) : '',
     sequence: row ? field(row,'Sequence','Seq','Location Sequence','Placement Sequence') : '',
@@ -473,7 +475,7 @@ async function updateStoneAdmin(btnOrId, maybeId){
     setSync('Save failed or offline: admin changes queued and will sync later');
     alert('Save failed. Error: ' + err.message);
   }finally{
-    const newBtn = document.querySelector(`[data-admin-row="${CSS.escape(id)}"] button`);
+    const newBtn = document.querySelector(`[data-admin-row="${CSS.escape(key)}"] button`);
     if(newBtn){ newBtn.disabled = false; newBtn.textContent = 'Save'; }
   }
 }
