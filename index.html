@@ -419,14 +419,15 @@ async function updateStoneAdmin(id){
     if(!res.ok || data.ok === false || data.error){
       throw new Error(data.error || text || 'Save failed');
     }
-    setSync('Stone admin fields saved. Refreshing live data...');
-    setTimeout(()=>loadData({manual:true}), 900);
+    setSync('Stone admin fields saved.');
+    searchStone();
+    if(selectedDeckSequence) displayDeckRows();
   }catch(err){
     queuePending(payload);
     setSync('Save failed or offline: admin changes queued and will sync later');
-    alert('Save did not reach Google Sheets yet. Check that the Apps Script has the updateStoneAdmin action deployed.');
+    alert('Save did not reach Google Sheets yet. Check that the Apps Script has the updateStoneAdmin action deployed/redeployed. The app will show the local change for now.');
+    searchStone();
   }
-  searchStone();
 }
 window.updateStoneAdmin = updateStoneAdmin;
 window.updateStatus = updateStoneAdmin;
