@@ -442,18 +442,13 @@ async function updateStoneAdmin(btnOrId, maybeId){
     weighedWeight
   };
   try{
-    const res = await fetch(API_URL, {
+    await fetch(API_URL, {
       method:'POST',
+      mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(payload)
     });
-    const text = await res.text();
-    let data = {};
-    try{ data = text ? JSON.parse(text) : {}; }catch(e){}
-    if(!res.ok || data.ok === false || data.error){
-      throw new Error(data.error || text || 'Save failed');
-    }
-    setSync('Saved to Google Sheets.');
+    setSync('Save sent to Google Sheets. Refresh data in a few seconds to confirm.');
     if(selectedDeckSequence) displayDeckRows();
   }catch(err){
     queuePending(payload);
@@ -473,9 +468,7 @@ async function syncPending(){
   const remaining = [];
   for(const item of q){
     try{
-      const res = await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item.action ? item : {action:'updateStoneAdmin',...item})});
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok || data.ok === false || data.error) remaining.push(item);
+      await fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item.action ? item : {action:'updateStoneAdmin',...item})});
     }catch(e){remaining.push(item);}
   }
   localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
