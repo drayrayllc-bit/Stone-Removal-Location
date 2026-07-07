@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#f5f5f7" />
   <style>
     :root{--bg:#f5f5f7;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--blue:#007aff;--red:#ff3b30;--green:#34c759;--gray:#8e8e93;--shadow:0 14px 35px rgba(0,0,0,.08);--radius:22px}
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif} button,input,select{font:inherit} .wrap{max-width:920px;margin:0 auto;padding:18px 14px 50px}.top{position:sticky;top:0;z-index:5;margin:-18px -14px 18px;padding:18px 14px 12px;background:rgba(245,245,247,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(229,231,235,.8)}.toprow{max-width:920px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between}.title h1{margin:0;font-size:30px;letter-spacing:-.7px}.title p{margin:4px 0 0;color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center}.row input{flex:1}.stack{display:grid;gap:12px} label{font-weight:650;font-size:14px} input,select{width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px 14px;outline:none} input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14)}button{border:0;border-radius:16px;background:var(--blue);color:#fff;font-weight:700;padding:13px 16px;cursor:pointer}button.secondary{background:#eef2ff;color:#1f2937}button.ghost{background:#fff;color:var(--blue);border:1px solid var(--line)}button:active{transform:scale(.99)}.muted{color:var(--muted)}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none!important}.result{margin-top:14px}.stone-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.stone-head h2{margin:0;font-size:25px;letter-spacing:-.4px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800;white-space:nowrap}.status-to-be-removed{background:rgba(142,142,147,.16);color:#555}.status-removed{background:rgba(255,59,48,.12);color:#b42318}.status-reinstalled{background:rgba(52,199,89,.14);color:#147a32}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.detail{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fafafa}.detail span{display:block;color:var(--muted);font-size:12px}.detail strong{display:block;margin-top:4px;font-size:18px}.facebox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.facebox label{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;font-size:17px}.facebox label.disabled{opacity:.38;background:#f3f4f6}.facebox input{width:auto}.deck-seq{display:grid;gap:10px}.deck-seq button{background:#fff;color:var(--text);border:1px solid var(--line);display:flex;justify-content:space-between;text-align:left}.deck-seq button.active{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14)}.bay-card{border:1px solid var(--line);border-radius:18px;background:#fff;margin:12px 0;overflow:hidden}.bay-head{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;color:var(--text);text-align:left;border-radius:0;padding:14px 16px}.bay-head b{font-size:18px}.bay-body{padding:0 16px 12px}.stone-line{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;border-top:1px solid var(--line);padding:10px 0}.seq-list{display:grid;gap:10px}.seq-btn{background:#fff;color:var(--text);border:1px solid var(--line);display:flex;justify-content:space-between;text-align:left}.adminbar{display:flex;gap:10px;margin-top:14px}.adminbar select{flex:1}.notice{border-left:4px solid var(--blue)}.search-wrap{position:relative;flex:1}.suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);z-index:20;overflow:hidden;max-height:320px;overflow-y:auto}.suggestion{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left;background:#fff;color:var(--text);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:12px 14px}.suggestion:last-child{border-bottom:0}.suggestion b{font-size:16px}.suggestion small{color:var(--muted)}.camera-box{border:1px solid var(--line);border-radius:18px;background:#000;overflow:hidden}.camera-box video{width:100%;max-height:360px;display:block;background:#000}.camera-actions{display:flex;gap:10px;flex-wrap:wrap}.scan-status{font-size:14px;color:var(--muted);margin:0}.top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}@media(max-width:620px){.row,.adminbar{flex-direction:column;align-items:stretch}.top-actions{width:100%}.top-actions button{flex:1}.grid{grid-template-columns:1fr}.stone-line{grid-template-columns:1fr}.toprow{align-items:flex-start}.facebox{grid-template-columns:repeat(2,1fr)}}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif} button,input,select{font:inherit} .wrap{max-width:920px;margin:0 auto;padding:18px 14px 50px}.top{position:sticky;top:0;z-index:5;margin:-18px -14px 18px;padding:18px 14px 12px;background:rgba(245,245,247,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(229,231,235,.8)}.toprow{max-width:920px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between}.title h1{margin:0;font-size:30px;letter-spacing:-.7px}.title p{margin:4px 0 0;color:var(--muted);font-size:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}.row{display:flex;gap:10px;align-items:center}.row input{flex:1}.stack{display:grid;gap:12px} label{font-weight:650;font-size:14px} input,select{width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px 14px;outline:none} input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14)}button{border:0;border-radius:16px;background:var(--blue);color:#fff;font-weight:700;padding:13px 16px;cursor:pointer}button.secondary{background:#eef2ff;color:#1f2937}button.ghost{background:#fff;color:var(--blue);border:1px solid var(--line)}button:active{transform:scale(.99)}.muted{color:var(--muted)}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none!important}.result{margin-top:14px}.stone-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.stone-head h2{margin:0;font-size:25px;letter-spacing:-.4px}.pill{display:inline-flex;align-items:center;border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800;white-space:nowrap}.status-to-be-removed{background:rgba(142,142,147,.16);color:#555}.status-removed{background:rgba(255,59,48,.12);color:#b42318}.status-reinstalled{background:rgba(52,199,89,.14);color:#147a32}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.detail{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fafafa}.detail span{display:block;color:var(--muted);font-size:12px}.detail strong{display:block;margin-top:4px;font-size:18px}.facebox{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.facebox label{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;font-size:17px}.facebox label.disabled{opacity:.38;background:#f3f4f6}.facebox input{width:auto}.deck-seq{display:grid;gap:10px}.deck-seq button{background:#fff;color:var(--text);border:1px solid var(--line);display:flex;justify-content:space-between;text-align:left}.deck-seq button.active{border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,.14)}.bay-card{border:1px solid var(--line);border-radius:18px;background:#fff;margin:12px 0;overflow:hidden}.bay-head{width:100%;display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;color:var(--text);text-align:left;border-radius:0;padding:14px 16px}.bay-head b{font-size:18px}.bay-body{padding:0 16px 12px}.stone-line{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;border-top:1px solid var(--line);padding:10px 0}.seq-list{display:grid;gap:10px}.seq-btn{background:#fff;color:var(--text);border:1px solid var(--line);display:flex;justify-content:space-between;text-align:left}.adminbar{display:flex;gap:10px;margin-top:14px}.adminbar select{flex:1}.notice{border-left:4px solid var(--blue)}.search-wrap{position:relative;flex:1}.suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);z-index:20;overflow:hidden;max-height:320px;overflow-y:auto}.suggestion{width:100%;display:flex;justify-content:space-between;gap:10px;text-align:left;background:#fff;color:var(--text);border:0;border-bottom:1px solid var(--line);border-radius:0;padding:12px 14px}.suggestion:last-child{border-bottom:0}.suggestion b{font-size:16px}.suggestion small{color:var(--muted)}.camera-box{border:1px solid var(--line);border-radius:18px;background:#000;overflow:hidden}.camera-box video{width:100%;max-height:360px;display:block;background:#000}.camera-actions{display:flex;gap:10px;flex-wrap:wrap}.scan-status{font-size:14px;color:var(--muted);margin:0}.top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}@media(max-width:620px){.row,.adminbar{flex-direction:column;align-items:stretch}.top-actions{width:100%}.top-actions button{flex:1}.grid{grid-template-columns:1fr}.stone-line{grid-template-columns:1fr}.toprow{align-items:flex-start}.facebox{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
@@ -100,9 +100,21 @@ function field(row,...keys){
   return '';
 }
 function rowId(row){return String(field(row,'ID','Id','id','Placement ID','Row ID') || '');}
-function displayWeight(row){const w = field(row,'Weight (lbs)','Weight','Weight lbs','Weight Pounds'); return w === '' ? '-' : `${w} lbs`;}
+function plannedWeightValue(row){return field(row,'Weight (lbs)','Weight','Weight lbs','Weight Pounds');}
+function displayWeight(row){const w = plannedWeightValue(row); return w === '' ? '-' : `${Number(w).toLocaleString()} lbs`;}
 function weighedWeightValue(row){return field(row,'Weighed Weight','Weighed Weight (lbs)','Weighed Weight lbs','Actual Weight','Actual Weight (lbs)');}
-function displayWeighedWeight(row){const w = weighedWeightValue(row); return w === '' ? '-' : `${w} lbs`;}
+function displayWeighedWeight(row){const w = weighedWeightValue(row); return w === '' ? '-' : `${Number(w).toLocaleString()} lbs`;}
+function weightDifference(row){
+  const planned = Number(plannedWeightValue(row));
+  const weighed = Number(weighedWeightValue(row));
+  if(!Number.isFinite(planned) || !Number.isFinite(weighed) || weighedWeightValue(row) === '') return '-';
+  const diff = weighed - planned;
+  const pct = planned ? (diff / planned) * 100 : 0;
+  const sign = diff > 0 ? '+' : '';
+  return `${sign}${diff.toLocaleString()} lbs (${sign}${pct.toFixed(1)}%)`;
+}
+function sumPlanned(rows){return rows.reduce((sum,r)=>sum + (parseFloat(plannedWeightValue(r)) || 0),0);}
+function sumWeighed(rows){return rows.reduce((sum,r)=>sum + (parseFloat(weighedWeightValue(r)) || 0),0);}
 function formatTime(d){return d ? d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';}
 function setSync(text){$('syncStatus').textContent = text;}
 function setLiveSync(count){lastSyncAt = new Date(); setSync(`Live data loaded: ${count} stones • Last synced ${formatTime(lastSyncAt)}`);}
@@ -174,6 +186,7 @@ function renderStone(row){
       <div class="detail"><span>Scaffold Bay</span><strong>${field(row,'Scaffold Bay','Bay','ScaffoldBay') || '-'}</strong></div>
       <div class="detail"><span>Planned Weight</span><strong>${displayWeight(row)}</strong></div>
       <div class="detail"><span>Weighed Weight</span><strong>${displayWeighedWeight(row)}</strong></div>
+      <div class="detail"><span>Difference</span><strong>${weightDifference(row)}</strong></div>
     </div>
     ${isAdmin ? adminControls(id,status,weighedWeightValue(row)) : ''}
   </article>`;
@@ -291,13 +304,16 @@ function displayDeckRows(){
   const groups = new Map();
   rows.forEach(r=>{const bay = norm(field(r,'Scaffold Bay','Bay','ScaffoldBay')) || 'No Bay Assigned'; if(!groups.has(bay)) groups.set(bay,[]); groups.get(bay).push(r);});
   const sorted = [...groups.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));
-  const totalWeight = rows.reduce((sum,r)=>sum + (parseFloat(field(r,'Weight (lbs)','Weight')) || 0),0);
-  out.innerHTML = `<div class="card"><h2>Deck Level ${deck}</h2><p class="muted">Sequence ${selectedDeckSequence} • Faces: ${faces.join(', ')} • ${rows.length} stones • ${totalWeight.toLocaleString()} lbs total</p></div>` + sorted.map(([bay,items])=>renderBay(bay,items)).join('');
+  const totalWeight = sumPlanned(rows);
+  const totalWeighed = sumWeighed(rows);
+  const weighedText = totalWeighed ? ` • ${totalWeighed.toLocaleString()} lbs weighed` : '';
+  out.innerHTML = `<div class="card"><h2>Deck Level ${deck}</h2><p class="muted">Sequence ${selectedDeckSequence} • Faces: ${faces.join(', ')} • ${rows.length} stones • ${totalWeight.toLocaleString()} lbs planned${weighedText}</p></div>` + sorted.map(([bay,items])=>renderBay(bay,items)).join('');
 }
 function renderBay(bay,items){
-  const weight = items.reduce((sum,r)=>sum + (parseFloat(field(r,'Weight (lbs)','Weight')) || 0),0);
+  const weight = sumPlanned(items);
+  const weighed = sumWeighed(items);
   items.sort((a,b)=>field(a,'Stone Number','Stone','Stone #','Stone No','Stone No.').localeCompare(field(b,'Stone Number','Stone','Stone #','Stone No','Stone No.'),undefined,{numeric:true}) || norm(field(a,'Sequence')).localeCompare(norm(field(b,'Sequence')),undefined,{numeric:true}));
-  return `<div class="bay-card" data-expanded="true"><button class="bay-head" onclick="toggleBay(this)"><span><b>▼ ${bay}</b><br><span class="muted">${items.length} stones • ${weight.toLocaleString()} lbs</span></span></button><div class="bay-body">${items.map(r=>`<div class="stone-line"><b>${field(r,'Stone Number','Stone','Stone #','Stone No','Stone No.')}</b><span>Seq ${field(r,'Sequence') || '-'}</span><span class="pill ${statusClass(field(r,'Status'))}">${normStatus(field(r,'Status'))}</span></div>`).join('')}</div></div>`;
+  return `<div class="bay-card" data-expanded="true"><button class="bay-head" onclick="toggleBay(this)"><span><b>▼ ${bay}</b><br><span class="muted">${items.length} stones • ${weight.toLocaleString()} lbs planned${weighed ? ' • ' + weighed.toLocaleString() + ' lbs weighed' : ''}</span></span></button><div class="bay-body">${items.map(r=>`<div class="stone-line"><b>${field(r,'Stone Number','Stone','Stone #','Stone No','Stone No.')}</b><span>Seq ${field(r,'Sequence') || '-'}</span><span>${displayWeighedWeight(r)}</span><span class="pill ${statusClass(field(r,'Status'))}">${normStatus(field(r,'Status'))}</span></div>`).join('')}</div></div>`;
 }
 window.toggleBay = function(btn){const card = btn.closest('.bay-card'); const body = card.querySelector('.bay-body'); const b = btn.querySelector('b'); const expanded = card.dataset.expanded === 'true'; card.dataset.expanded = expanded ? 'false':'true'; body.style.display = expanded ? 'none':'block'; b.textContent = b.textContent.replace(expanded ? '▼':'▶', expanded ? '▶':'▼');};
 
@@ -400,7 +416,7 @@ async function updateStoneAdmin(id){
     const text = await res.text();
     let data = {};
     try{ data = text ? JSON.parse(text) : {}; }catch(e){}
-    if(!res.ok || data.ok === false){
+    if(!res.ok || data.ok === false || data.error){
       throw new Error(data.error || text || 'Save failed');
     }
     setSync('Stone admin fields saved. Refreshing live data...');
@@ -419,7 +435,13 @@ async function syncPending(){
   const q = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
   if(!q.length) return;
   const remaining = [];
-  for(const item of q){try{await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item.action ? item : {action:'updateStoneAdmin',...item})});}catch(e){remaining.push(item);}}
+  for(const item of q){
+    try{
+      const res = await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(item.action ? item : {action:'updateStoneAdmin',...item})});
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || data.ok === false || data.error) remaining.push(item);
+    }catch(e){remaining.push(item);}
+  }
   localStorage.setItem(PENDING_KEY, JSON.stringify(remaining));
 }
 function unlockAdmin(){
