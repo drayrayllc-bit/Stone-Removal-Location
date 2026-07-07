@@ -99,7 +99,7 @@ function field(row,...keys){
   }
   return '';
 }
-function rowId(row){return String(field(row,'ID','Id','id','Placement ID','Row ID') || '');}
+function rowId(row){return String(row.__clientKey || field(row,'__rowNumber','Sheet Row','Row Number') || field(row,'ID','Id','id','Placement ID','Row ID') || '');}
 function plannedWeightValue(row){return field(row,'Weight (lbs)','Weight','Weight lbs','Weight Pounds');}
 function displayWeight(row){const w = plannedWeightValue(row); return w === '' ? '-' : `${Number(w).toLocaleString()} lbs`;}
 function weighedWeightValue(row){return field(row,'Weighed Weight','Weighed Weight (lbs)','Weighed Weight lbs','Actual Weight','Actual Weight (lbs)');}
@@ -118,8 +118,9 @@ function sumWeighed(rows){return rows.reduce((sum,r)=>sum + (parseFloat(weighedW
 function formatTime(d){return d ? d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '';}
 function setSync(text){$('syncStatus').textContent = text;}
 function setLiveSync(count){lastSyncAt = new Date(); setSync(`Live data loaded: ${count} stones • Last synced ${formatTime(lastSyncAt)}`);}
-function cleanRow(row){
+function cleanRow(row, index){
   const r = {...row};
+  r.__clientKey = String(index ?? field(r,'__rowNumber','Sheet Row','Row Number') ?? Math.random());
   r['Stone Number'] = normStone(field(r,'Stone Number','Stone Number ','Stone','Stone #','Stone No','Stone No.'));
   r['Face/Elevation'] = normFace(field(r,'Face/Elevation','Face','Elevation','Face Elevation','NSEW'));
   r['Status'] = normStatus(field(r,'Status'));
@@ -147,7 +148,7 @@ async function loadData(options = {}){
     const res = await fetch(API_URL + '?action=list&ts=' + Date.now(), {cache:'no-store'});
     if(!res.ok) throw new Error('Bad response');
     const data = await res.json();
-    stones = (data.stones || []).map(cleanRow);
+    stones = (data.stones || []).map((row,index)=>cleanRow(row,index));
     localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
     setLiveSync(stones.length);
     syncPending();
@@ -428,7 +429,18 @@ async function updateStoneAdmin(btnOrId, maybeId){
     if(pill){ pill.className = 'pill ' + statusClass(status); pill.textContent = status; }
   }
 
-  const payload = {action:'updateStoneAdmin', id, status, weighedWeight};
+  const payload = {
+    action:'updateStoneAdmin',
+    id,
+    rowNumber: row ? (row.__rowNumber || field(row,'Sheet Row','Row Number')) : '',
+    stoneNumber: row ? stoneValue(row) : '',
+    sequence: row ? field(row,'Sequence','Seq','Location Sequence','Placement Sequence') : '',
+    deckLevel: row ? field(row,'Deck Level','Deck','DeckLevel') : '',
+    scaffoldBay: row ? field(row,'Scaffold Bay','Bay','ScaffoldBay') : '',
+    faceElevation: row ? field(row,'Face/Elevation','Face','Elevation') : '',
+    status,
+    weighedWeight
+  };
   try{
     const res = await fetch(API_URL, {
       method:'POST',
