@@ -53,8 +53,8 @@
     <main id="removedPage" class="hidden">
       <section class="card stack">
         <div>
-          <h2 style="margin:0">Removed Stones by Date</h2>
-          <p class="muted" style="margin:5px 0 0">Daily summaries use the removal date stored in the Google Sheet.</p>
+          <h2 style="margin:0">Removed Work by Date</h2>
+          <p class="muted" style="margin:5px 0 0">Daily summaries show stone removal and brick backup removal using their separate dates.</p>
         </div>
         <div class="summary-toolbar">
           <div>
@@ -147,6 +147,15 @@ function removedDateValue(row){
 function brickRemovalValue(row){
   return field(row,'Brick Removal');
 }
+function brickDateRemovedValue(row){
+  return field(row,'Brick Date Removed');
+}
+function brickStoneNumberValue(row){
+  return field(row,'Brick Stone Number') || stoneValue(row);
+}
+function brickSqftValue(row){
+  return field(row,'Brick SQFT','Brick Sq Ft','Brick SF','Brick Square Feet');
+}
 function normalizeDateKey(value){
   if(value === '' || value === null || value === undefined) return '';
   if(value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0,10);
@@ -178,74 +187,65 @@ function renderRemovedSummary(){
   if(!out) return;
 
   const filter = $('removedDateFilter') ? $('removedDateFilter').value : '';
-  const datedRows = stones
+
+  const stoneEntries = stones
     .map(row=>({row,dateKey:normalizeDateKey(removedDateValue(row))}))
-    .filter(x=>x.dateKey);
+    .filter(x=>x.dateKey && (!filter || x.dateKey===filter));
 
-  const filtered = filter ? datedRows.filter(x=>x.dateKey===filter) : datedRows;
+  const brickEntries = stones
+    .map(row=>({row,dateKey:normalizeDateKey(brickDateRemovedValue(row))}))
+    .filter(x=>x.dateKey && String(brickRemovalValue(x.row)).trim().toLowerCase()==='removed' && (!filter || x.dateKey===filter));
 
-  if(!filtered.length){
-    out.innerHTML = `<div class="card"><h2>No removed stones found</h2><p class="muted">${filter ? 'No stones have a removal date for this day.' : 'No dates were found under the Date Removed header. Add removal dates in Google Sheets, then refresh the app.'}</p></div>`;
+  if(!stoneEntries.length && !brickEntries.length){
+    out.innerHTML = `<div class="card"><h2>No removed work found</h2><p class="muted">${filter ? 'No stone or brick backup removal is recorded for this day.' : 'No stone removal dates or brick backup removal dates were found. Add the dates in the app or Google Sheet, then refresh.'}</p></div>`;
     return;
   }
 
   const groups = new Map();
-  filtered.forEach(x=>{
-    if(!groups.has(x.dateKey)) groups.set(x.dateKey,[]);
-    groups.get(x.dateKey).push(x.row);
-  });
+  function getGroup(dateKey){
+    if(!groups.has(dateKey)) groups.set(dateKey,{stones:[],bricks:[]});
+    return groups.get(dateKey);
+  }
+  stoneEntries.forEach(x=>getGroup(x.dateKey).stones.push(x.row));
+  brickEntries.forEach(x=>getGroup(x.dateKey).bricks.push(x.row));
 
   const dates = [...groups.keys()].sort((a,b)=>b.localeCompare(a));
-  const allRows = filtered.map(x=>x.row);
+  const allStoneRows = stoneEntries.map(x=>x.row);
+  const allBrickRows = brickEntries.map(x=>x.row);
 
-  const totalAssumed = allRows.reduce((sum,row)=>{
-    const v = parseFloat(assumedWeightValue(row));
-    return sum + (Number.isFinite(v) ? v : 0);
-  },0);
-
-  const totalWeighed = allRows.reduce((sum,row)=>{
+  const totalAssumed = allStoneRows.reduce((sum,row)=>sum + (parseFloat(assumedWeightValue(row)) || 0),0);
+  const totalWeighed = allStoneRows.reduce((sum,row)=>{
     const raw = weighedWeightValue(row);
     const v = parseFloat(raw);
     return sum + (raw !== '' && Number.isFinite(v) ? v : 0);
   },0);
-
-  const pctValues = allRows
-    .map(row=>parseFloat(percentDifferenceValue(row)))
-    .filter(Number.isFinite);
-  const avgPct = pctValues.length ? pctValues.reduce((a,b)=>a+b,0)/pctValues.length : null;
+  const totalBrickSqft = allBrickRows.reduce((sum,row)=>sum + (parseFloat(brickSqftValue(row)) || 0),0);
 
   out.innerHTML =
     `<section class="card"><div class="summary-stat-grid">` +
-      `<div class="summary-stat"><span>Total Stones</span><strong>${allRows.length}</strong></div>` +
+      `<div class="summary-stat"><span>Total Stones Removed</span><strong>${allStoneRows.length}</strong></div>` +
       `<div class="summary-stat"><span>Total Assumed Weight</span><strong>${totalAssumed.toLocaleString()} lbs</strong></div>` +
       `<div class="summary-stat"><span>Total Weighed Weight</span><strong>${totalWeighed.toLocaleString()} lbs</strong></div>` +
-      `<div class="summary-stat"><span>Average % Difference</span><strong>${avgPct === null ? '-' : avgPct.toFixed(1) + '%'}</strong></div>` +
+      `<div class="summary-stat"><span>Total Brick Backup Removed</span><strong>${totalBrickSqft.toLocaleString(undefined,{maximumFractionDigits:2})} SQFT</strong></div>` +
     `</div></section>` +
     dates.map(dateKey=>{
-      const rows = groups.get(dateKey).slice().sort((a,b)=>stoneValue(a).localeCompare(stoneValue(b),undefined,{numeric:true}));
+      const group = groups.get(dateKey);
+      const stoneRows = group.stones.slice().sort((a,b)=>stoneValue(a).localeCompare(stoneValue(b),undefined,{numeric:true}));
+      const brickRows = group.bricks.slice().sort((a,b)=>brickStoneNumberValue(a).localeCompare(brickStoneNumberValue(b),undefined,{numeric:true}));
 
-      const dayAssumed = rows.reduce((sum,row)=>{
-        const v = parseFloat(assumedWeightValue(row));
-        return sum + (Number.isFinite(v) ? v : 0);
-      },0);
-
-      const dayWeighed = rows.reduce((sum,row)=>{
+      const dayAssumed = stoneRows.reduce((sum,row)=>sum + (parseFloat(assumedWeightValue(row)) || 0),0);
+      const dayWeighed = stoneRows.reduce((sum,row)=>{
         const raw = weighedWeightValue(row);
         const v = parseFloat(raw);
         return sum + (raw !== '' && Number.isFinite(v) ? v : 0);
       },0);
+      const dayBrickSqft = brickRows.reduce((sum,row)=>sum + (parseFloat(brickSqftValue(row)) || 0),0);
 
-      const dayPctValues = rows
-        .map(row=>parseFloat(percentDifferenceValue(row)))
-        .filter(Number.isFinite);
-      const dayAvgPct = dayPctValues.length ? dayPctValues.reduce((a,b)=>a+b,0)/dayPctValues.length : null;
-
-      return `<section class="summary-day">` +
-        `<div class="summary-day-head"><h3>${formatDateLabel(dateKey)}</h3>` +
-        `<p>${rows.length} stone${rows.length===1?'':'s'} • ${dayAssumed.toLocaleString()} lbs assumed • ${dayWeighed.toLocaleString()} lbs weighed${dayAvgPct===null?'':' • '+dayAvgPct.toFixed(1)+'% avg difference'}</p></div>` +
+      const stoneSection = stoneRows.length ?
+        `<div style="padding:14px 16px 4px"><h4 style="margin:0">Stones Removed</h4></div>` +
         `<div style="overflow-x:auto"><table class="summary-table">` +
         `<thead><tr><th>Stone</th><th>Assumed Weight</th><th>Weighed Weight</th><th>% Difference</th><th>Deck</th><th>Bay</th></tr></thead>` +
-        `<tbody>${rows.map(row=>{
+        `<tbody>${stoneRows.map(row=>{
           const assumed = assumedWeightValue(row);
           const weighed = weighedWeightValue(row);
           const pct = percentDifferenceValue(row);
@@ -257,7 +257,21 @@ function renderRemovedSummary(){
             `<td>${field(row,'Deck Level','Deck')||'-'}</td>` +
             `<td>${field(row,'Scaffold Bay','Bay')||'-'}</td>` +
           `</tr>`;
-        }).join('')}</tbody></table></div></section>`;
+        }).join('')}</tbody></table></div>` : '';
+
+      const brickSection = brickRows.length ?
+        `<div style="padding:16px 16px 4px"><h4 style="margin:0">Brick Backup Removed</h4></div>` +
+        `<div style="overflow-x:auto"><table class="summary-table">` +
+        `<thead><tr><th>Stone</th><th>Brick SQFT</th></tr></thead>` +
+        `<tbody>${brickRows.map(row=>{
+          const sqft = brickSqftValue(row);
+          return `<tr><td><b>${brickStoneNumberValue(row)||'-'}</b></td><td>${sqft!==''?Number(sqft).toLocaleString(undefined,{maximumFractionDigits:2})+' SQFT':'-'}</td></tr>`;
+        }).join('')}</tbody></table></div>` : '';
+
+      return `<section class="summary-day">` +
+        `<div class="summary-day-head"><h3>${formatDateLabel(dateKey)}</h3>` +
+        `<p>${stoneRows.length} stone${stoneRows.length===1?'':'s'} removed • ${dayAssumed.toLocaleString()} lbs assumed • ${dayWeighed.toLocaleString()} lbs weighed • ${brickRows.length} brick backup location${brickRows.length===1?'':'s'} • ${dayBrickSqft.toLocaleString(undefined,{maximumFractionDigits:2})} SQFT</p></div>` +
+        stoneSection + brickSection + `</section>`;
     }).join('');
 }
 function showPage(page){
@@ -345,14 +359,20 @@ function renderStone(row){
       <div class="detail"><span>Weighed Weight</span><strong>${displayWeighedWeight(row)}</strong></div>
       <div class="detail"><span>Difference</span><strong>${weightDifference(row)}</strong></div>
     </div>
-    ${isAdmin ? adminControls(key,status,weighedWeightValue(row),normalizeDateKey(removedDateValue(row))) : ''}
+    ${isAdmin ? adminControls(key,status,weighedWeightValue(row),normalizeDateKey(removedDateValue(row)),normalizeDateKey(brickDateRemovedValue(row))) : ''}
   </article>`;
 }
 function escAttr(v){return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function adminControls(key,status,weighedWeight,dateRemoved){
+function adminControls(key,status,weighedWeight,dateRemoved,brickDateRemoved){
   if(!key) return `<p class="muted">Missing row key. Refresh data and try again.</p>`;
   const safeKey = escAttr(key);
-  return `<div class="adminbar" data-admin-row="${safeKey}"><select data-status-for="${safeKey}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select><input data-weighed-for="${safeKey}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}"><input data-date-removed-for="${safeKey}" type="date" aria-label="Date Removed" value="${escAttr(dateRemoved || '')}"><button type="button" onclick="updateStoneAdmin(this, '${safeKey}')">Save</button></div>`;
+  return `<div class="adminbar" data-admin-row="${safeKey}">` +
+    `<select data-status-for="${safeKey}">${ALLOWED_STATUSES.map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}</select>` +
+    `<input data-weighed-for="${safeKey}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}">` +
+    `<label><span class="muted">Stone Removal Date</span><input data-date-removed-for="${safeKey}" type="date" value="${escAttr(dateRemoved || '')}"></label>` +
+    `<label><span class="muted">Brick Backup Removal Date</span><input data-brick-date-removed-for="${safeKey}" type="date" value="${escAttr(brickDateRemoved || '')}"></label>` +
+    `<button type="button" onclick="updateStoneAdmin(this, '${safeKey}')">Save</button>` +
+  `</div>`;
 }
 
 function getStoneMatches(query){
@@ -566,6 +586,7 @@ function buildSaveUrl(payload){
   params.set('weighedWeight', payload.weighedWeight || '');
   params.set('dateRemoved', payload.dateRemoved || '');
   params.set('brickRemoval', payload.brickRemoval || '');
+  params.set('brickDateRemoved', payload.brickDateRemoved || '');
   return API_URL + '?' + params.toString();
 }
 
@@ -586,11 +607,15 @@ async function updateStoneAdmin(btnOrId, maybeId){
   const weightInput = bar ? bar.querySelector('[data-weighed-for]') : document.querySelector(`[data-weighed-for="${CSS.escape(key)}"]`);
   const dateInput = bar ? bar.querySelector('[data-date-removed-for]') : document.querySelector(`[data-date-removed-for="${CSS.escape(key)}"]`);
   const brickInput = document.querySelector(`[data-brick-removal-for="${CSS.escape(key)}"]`);
+  const brickDateInput = bar ? bar.querySelector('[data-brick-date-removed-for]') : document.querySelector(`[data-brick-date-removed-for="${CSS.escape(key)}"]`);
 
   const status = sel ? sel.value : '';
   const weighedWeight = weightInput ? String(weightInput.value || '').trim() : '';
   const dateRemoved = dateInput ? String(dateInput.value || '').trim() : '';
   const brickRemoval = brickInput && brickInput.checked ? 'Removed' : '';
+  const brickDateRemoved = brickDateInput ? String(brickDateInput.value || '').trim() : '';
+
+  if(brickRemoval === 'Removed' && !brickDateRemoved) return alert('Select a Brick Backup Removal Date before saving.');
 
   if(!ALLOWED_STATUSES.includes(status)) return alert('Invalid status');
   if(weighedWeight !== '' && (Number.isNaN(Number(weighedWeight)) || Number(weighedWeight) < 0)) return alert('Enter a valid weighed weight.');
@@ -605,6 +630,8 @@ async function updateStoneAdmin(btnOrId, maybeId){
     row['Weighed Weight (lbs)'] = weighedWeight;
     row['Date Removed'] = dateRemoved;
     row['Brick Removal'] = brickRemoval;
+    row['Brick Stone Number'] = brickRemoval ? stoneValue(row) : '';
+    row['Brick Date Removed'] = brickRemoval ? brickDateRemoved : '';
   }
   localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
 
@@ -628,7 +655,8 @@ async function updateStoneAdmin(btnOrId, maybeId){
     status,
     weighedWeight,
     dateRemoved,
-    brickRemoval
+    brickRemoval,
+    brickDateRemoved
   };
   try{
     await sendAdminUpdate(payload);
