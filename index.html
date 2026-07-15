@@ -459,11 +459,11 @@ function renderStone(row){
       <div class="detail"><span>Weighed Weight</span><strong>${displayWeighedWeight(row)}</strong></div>
       <div class="detail"><span>Difference</span><strong>${weightDifference(row)}</strong></div>
     </div>
-    ${isAdmin ? adminControls(key,status,weighedWeightValue(row),normalizeDateKey(removedDateValue(row)),normalizeDateKey(brickDateRemovedValue(row))) : ''}
+    ${isAdmin ? adminControls(key,status,weighedWeightValue(row),normalizeDateKey(removedDateValue(row)),normalizeDateKey(brickDateRemovedValue(row)),brickSqftValue(row)) : ''}
   </article>`;
 }
 function escAttr(v){return String(v ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function adminControls(key,status,weighedWeight,dateRemoved,brickDateRemoved){
+function adminControls(key,status,weighedWeight,dateRemoved,brickDateRemoved,brickSqft){
   if(!key) return `<p class="muted">Missing row key. Refresh data and try again.</p>`;
   const safeKey = escAttr(key);
   return `<div class="adminbar" data-admin-row="${safeKey}">` +
@@ -471,6 +471,7 @@ function adminControls(key,status,weighedWeight,dateRemoved,brickDateRemoved){
     `<input data-weighed-for="${safeKey}" type="number" min="0" step="1" inputmode="decimal" placeholder="Weighed Weight (lbs)" value="${escAttr(weighedWeight || '')}">` +
     `<label><span class="muted">Stone Removal Date</span><input data-date-removed-for="${safeKey}" type="date" value="${escAttr(dateRemoved || '')}"></label>` +
     `<label><span class="muted">Brick Backup Removal Date</span><input data-brick-date-removed-for="${safeKey}" type="date" value="${escAttr(brickDateRemoved || '')}"></label>` +
+    `<label><span class="muted">Brick Removal QTY (SQFT)</span><input data-brick-sqft-for="${safeKey}" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Brick SQFT" value="${escAttr(brickSqft || '')}"></label>` +
     `<button type="button" onclick="updateStoneAdmin(this, '${safeKey}')">Save</button>` +
   `</div>`;
 }
@@ -1042,6 +1043,7 @@ function buildSaveUrl(payload){
   params.set('dateRemoved', payload.dateRemoved || '');
   params.set('brickRemoval', payload.brickRemoval || '');
   params.set('brickDateRemoved', payload.brickDateRemoved || '');
+  params.set('brickSqft', payload.brickSqft || '');
   return API_URL + '?' + params.toString();
 }
 
@@ -1063,14 +1065,18 @@ async function updateStoneAdmin(btnOrId, maybeId){
   const dateInput = bar ? bar.querySelector('[data-date-removed-for]') : document.querySelector(`[data-date-removed-for="${CSS.escape(key)}"]`);
   const brickInput = document.querySelector(`[data-brick-removal-for="${CSS.escape(key)}"]`);
   const brickDateInput = bar ? bar.querySelector('[data-brick-date-removed-for]') : document.querySelector(`[data-brick-date-removed-for="${CSS.escape(key)}"]`);
+  const brickSqftInput = bar ? bar.querySelector('[data-brick-sqft-for]') : document.querySelector(`[data-brick-sqft-for="${CSS.escape(key)}"]`);
 
   const status = sel ? sel.value : '';
   const weighedWeight = weightInput ? String(weightInput.value || '').trim() : '';
   const dateRemoved = dateInput ? String(dateInput.value || '').trim() : '';
   const brickRemoval = brickInput && brickInput.checked ? 'Removed' : '';
   const brickDateRemoved = brickDateInput ? String(brickDateInput.value || '').trim() : '';
+  const brickSqft = brickSqftInput ? String(brickSqftInput.value || '').trim() : '';
 
   if(brickRemoval === 'Removed' && !brickDateRemoved) return alert('Select a Brick Backup Removal Date before saving.');
+  if(brickRemoval === 'Removed' && brickSqft === '') return alert('Enter the Brick Removal QTY in SQFT before saving.');
+  if(brickSqft !== '' && (Number.isNaN(Number(brickSqft)) || Number(brickSqft) < 0)) return alert('Enter a valid Brick SQFT quantity.');
 
   if(!ALLOWED_STATUSES.includes(status)) return alert('Invalid status');
   if(weighedWeight !== '' && (Number.isNaN(Number(weighedWeight)) || Number(weighedWeight) < 0)) return alert('Enter a valid weighed weight.');
@@ -1087,6 +1093,7 @@ async function updateStoneAdmin(btnOrId, maybeId){
     row['Brick Removal'] = brickRemoval;
     row['Brick Stone Number'] = brickRemoval ? stoneValue(row) : '';
     row['Brick Date Removed'] = brickRemoval ? brickDateRemoved : '';
+    row['Brick SQFT'] = brickRemoval ? brickSqft : '';
   }
   localStorage.setItem(CACHE_KEY, JSON.stringify(stones));
 
@@ -1111,7 +1118,8 @@ async function updateStoneAdmin(btnOrId, maybeId){
     weighedWeight,
     dateRemoved,
     brickRemoval,
-    brickDateRemoved
+    brickDateRemoved,
+    brickSqft
   };
   try{
     await sendAdminUpdate(payload);
