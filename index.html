@@ -20,7 +20,17 @@
 .map-fullscreen-body{position:relative;flex:1;min-height:0;overflow:hidden}
 .map-fullscreen-body .progress-map-shell{position:absolute;inset:0;height:100%;max-height:none;border:0;border-radius:0;background:#2f3339}
 body.map-fullscreen-open{overflow:hidden;touch-action:none}
-@media(max-width:620px){.row,.adminbar{flex-direction:column;align-items:stretch}.top-actions{width:100%}.top-actions button{flex:1}.grid{grid-template-columns:1fr}.stone-line{grid-template-columns:1fr}.toprow{align-items:flex-start}.facebox{grid-template-columns:repeat(2,1fr)}.summary-toolbar{grid-template-columns:1fr}.summary-stat-grid{grid-template-columns:1fr}.summary-table{font-size:14px}.summary-table th,.summary-table td{padding:10px 8px}}
+@media(max-width:620px){
+.row,.adminbar{flex-direction:column;align-items:stretch}.top-actions{width:100%}.top-actions button{flex:1}.grid{grid-template-columns:1fr}.stone-line{grid-template-columns:1fr}.toprow{align-items:flex-start}.facebox{grid-template-columns:repeat(2,1fr)}.summary-toolbar{grid-template-columns:1fr}.summary-stat-grid{grid-template-columns:1fr}.summary-table{font-size:14px}.summary-table th,.summary-table td{padding:10px 8px}
+.progress-toolbar{display:grid;grid-template-columns:1fr;align-items:stretch;width:100%}
+.progress-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;order:-1}
+.progress-actions button{display:block!important;width:100%;min-height:48px;font-size:16px}
+.map-page-tabs{width:100%}
+.map-enter-btn{display:block!important;visibility:visible!important;opacity:1!important}
+.progress-map-shell{height:68vh}
+}
+.map-enter-floating{position:absolute;top:12px;right:12px;z-index:5;background:var(--blue);color:#fff;border:2px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.25);padding:11px 15px;border-radius:14px;display:none}
+@media(max-width:620px){.map-enter-floating{display:block!important}}
   </style>
 </head>
 <body>
@@ -109,6 +119,7 @@ body.map-fullscreen-open{overflow:hidden;touch-action:none}
       <section class="card" style="padding:10px">
         <div id="progressMapHome">
         <div id="progressMapShell" class="progress-map-shell">
+          <button id="mapEnterFloatingBtn" class="map-enter-floating" type="button">Full Screen</button>
           <div id="progressMapMessage" class="progress-map-message">Loading progress map...</div>
           <div id="progressMapViewport" class="progress-map-viewport">
             <div id="progressMapStage" class="progress-map-stage">
@@ -1101,6 +1112,7 @@ $('mapPage2Btn').addEventListener('click', ()=>showProgressMapPage(2));
 $('mapResetBtn').addEventListener('click', resetProgressZoom);
 $('progressFindBtn').addEventListener('click', findProgressStone);
 $('mapEnterBtn').addEventListener('click', enterProgressFullscreen);
+$('mapEnterFloatingBtn').addEventListener('click', enterProgressFullscreen);
 $('mapFullscreenClose').addEventListener('click', exitProgressFullscreen);
 document.addEventListener('keydown', e=>{if(e.key==='Escape' && !$('mapFullscreen').classList.contains('hidden')) exitProgressFullscreen();});
 $('progressStoneSearch').addEventListener('keydown', e=>{if(e.key==='Enter') findProgressStone();});
