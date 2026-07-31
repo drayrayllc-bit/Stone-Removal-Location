@@ -422,6 +422,7 @@ function renderStone(row){
       <div class="detail"><span>Sequence</span><strong>${field(row,'Sequence') || '-'}</strong></div>
       <div class="detail"><span>Deck Level</span><strong>${field(row,'Deck Level','Deck','DeckLevel') || '-'}</strong></div>
       <div class="detail"><span>Scaffold Bay</span><strong>${field(row,'Scaffold Bay','Bay','ScaffoldBay') || '-'}</strong></div>
+      <div class="detail"><span>Actual Bay</span><strong>${actualBayValue(row) || '-'}</strong></div>
       <div class="detail"><span>Planned Weight</span><strong>${displayWeight(row)}</strong></div>
       <div class="detail"><span>Weighed Weight</span><strong>${displayWeighedWeight(row)}</strong></div>
       <div class="detail"><span>Difference</span><strong>${weightDifference(row)}</strong></div>
@@ -562,7 +563,7 @@ function renderBay(bay,items){
   items.sort((a,b)=>field(a,'Stone Number','Stone','Stone #','Stone No','Stone No.').localeCompare(field(b,'Stone Number','Stone','Stone #','Stone No','Stone No.'),undefined,{numeric:true}) || norm(field(a,'Sequence')).localeCompare(norm(field(b,'Sequence')),undefined,{numeric:true}));
   return `<div class="bay-card" data-expanded="true"><button class="bay-head" onclick="toggleBay(this)"><span><b>▼ ${bay}</b><br><span class="muted">${items.length} stones • ${weight.toLocaleString()} lbs planned${weighed ? ' • ' + weighed.toLocaleString() + ' lbs weighed' : ''}</span></span></button><div class="bay-body">${items.map(r=>{
     const key = escAttr(rowUniqueKey(r));
-    return `<div class="deck-stone-wrap"><div class="stone-line"><b>${field(r,'Stone Number','Stone','Stone #','Stone No','Stone No.')}</b><span>Seq ${field(r,'Sequence') || '-'}</span><span>${displayWeighedWeight(r)}</span><span class="pill ${statusClass(field(r,'Status'))}">${normStatus(field(r,'Status'))}</span>${isAdmin ? `<button type="button" class="secondary edit-stone-btn" onclick="toggleDeckStoneEdit(this,'${key}')">Edit</button>` : ''}</div><div class="deck-stone-editor hidden" data-deck-editor-for="${key}"></div></div>`;
+    return `<div class="deck-stone-wrap"><div class="stone-line"><b>${field(r,'Stone Number','Stone','Stone #','Stone No','Stone No.')}</b><span>Seq ${field(r,'Sequence') || '-'}</span><span>Actual Bay: <b>${actualBayValue(r) || '-'}</b></span><span>${displayWeighedWeight(r)}</span><span class="pill ${statusClass(field(r,'Status'))}">${normStatus(field(r,'Status'))}</span>${isAdmin ? `<button type="button" class="secondary edit-stone-btn" onclick="toggleDeckStoneEdit(this,'${key}')">Edit</button>` : ''}</div><div class="deck-stone-editor hidden" data-deck-editor-for="${key}"></div></div>`;
   }).join('')}</div></div>`;
 }
 window.toggleBay = function(btn){const card = btn.closest('.bay-card'); const body = card.querySelector('.bay-body'); const b = btn.querySelector('b'); const expanded = card.dataset.expanded === 'true'; card.dataset.expanded = expanded ? 'false':'true'; body.style.display = expanded ? 'none':'block'; b.textContent = b.textContent.replace(expanded ? '▼':'▶', expanded ? '▶':'▼');};
